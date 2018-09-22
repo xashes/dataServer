@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://rquser:ricequant99@py.ricequant.com/simple"
+verify_ssl = false
+name = "ricequant"
+
+[packages]
+rqdatac = {version="*", index="ricequant"}
+arctic = {git = "https://github.com/manahl/arctic.git"}
+tqdm = "*"
+
+[dev-packages]
+ipykernel = "*"
+pytest = "*"
+"flake8" = "*"
+autoflake = "*"
+
+[requires]
+python_version = "3.6"
