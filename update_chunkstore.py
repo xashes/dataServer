@@ -13,31 +13,6 @@ arctic = Arctic('localhost')
 # TODO: write test before refactor
 
 
-def init_libraries():
-    arctic.initialize_library('basedata')
-    arctic.initialize_library('daily', lib_type=CHUNK_STORE)
-    arctic.initialize_library('minute', lib_type=CHUNK_STORE)
-
-
-def update_basedata():
-    basedata = arctic['basedata']
-    stocks = rq.all_instruments('CS')
-    idx = rq.all_instruments('INDX')
-
-    try:
-        updated = basedata.list_versions()[0]['date'].date()
-        if updated == date.today():
-            print('Already updated today')
-            return
-    except:
-        pass
-
-    documents = {'stocks': stocks, 'indexes': idx}
-
-    for label, data in documents.items():
-        basedata.write(label, data)
-
-
 def all_sid():
     basedata = arctic['basedata']
     stocks = basedata.read('stocks').data['order_book_id']
@@ -152,10 +127,8 @@ def update_daily_lib():
 
 def main():
     rq.init()
-    # init_libraries()
-    update_basedata()
-    # init_minute_lib()
-    init_daily_lib()
+    update_minute_lib()
+    update_daily_lib()
 
 
 if __name__ == '__main__':
