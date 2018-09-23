@@ -100,12 +100,12 @@ def update_minute_lib():
 
 
 def init_daily_lib():
-    # try:
-    #     daily_lib = arctic['daily']
-    #     print('The daily library is already exists.')
-    #     return
-    # except LibraryNotFoundException:
-    #     arctic.initialize_library('daily', lib_type=CHUNK_STORE)
+    try:
+        daily_lib = arctic['daily']
+        print('The daily library is already exists.')
+        return
+    except LibraryNotFoundException:
+        arctic.initialize_library('daily', lib_type=CHUNK_STORE)
 
     daily_lib = arctic['daily']
     start_date = '2000-01-04'
@@ -124,6 +124,31 @@ def init_daily_lib():
         except Exception as e:
             # TODO: add logger later
             print(f'{sid}: {str(e)}')
+
+
+def update_daily_lib():
+    daily_lib = arctic['daily']
+    last_index = daily_lib.read(
+        '000001.XSHG', columns=['close'], chunk_range=('2018-09-20',
+                                                       None)).index[-1]
+    start_date = rq.get_next_trading_date(last_index)
+
+    for sid in tqdm(all_sid()):
+        try:
+            df = rq.get_price(
+                sid,
+                start_date=start_date,
+                end_date=date.today(),
+                frequency='1d',
+                adjust_type='post')
+            df.index.name = 'date'
+            if len(df) > 0:
+                daily_lib.update(
+                    sid, df, chunk_range=(start_date, None), upsert=True)
+        except Exception as e:
+            # TODO: add logger later
+            print(f'{sid}: {str(e)}')
+
 
 def main():
     rq.init()
